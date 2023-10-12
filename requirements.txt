@@ -11,7 +11,7 @@ imageio
 imageio-ffmpeg
 omegaconf
 
-torch
+#torch
 einops
 plyfile
 pygltflib
