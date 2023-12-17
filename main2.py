@@ -127,9 +127,11 @@ class GUI:
         if self.guidance_zero123 is None and self.enable_zero123:
             print(f"[INFO] loading zero123...")
             from guidance.zero123_utils import Zero123
-            self.guidance_zero123 = Zero123(self.device)
+            if self.opt.stable_zero123:
+                self.guidance_zero123 = Zero123(self.device, model_key='ashawkey/stable-zero123-diffusers')
+            else:
+                self.guidance_zero123 = Zero123(self.device, model_key='ashawkey/zero123-xl-diffusers')
             print(f"[INFO] loaded zero123!")
-
         # input image
         if self.input_img is not None:
             self.input_img_torch = torch.from_numpy(self.input_img).permute(2, 0, 1).unsqueeze(0).to(self.device)
@@ -237,7 +239,7 @@ class GUI:
 
             if self.enable_zero123:
                 # loss = loss + self.opt.lambda_zero123 * self.guidance_zero123.train_step(images, vers, hors, radii, step_ratio)
-                refined_images = self.guidance_zero123.refine(images, vers, hors, radii, strength=strength).float()
+                refined_images = self.guidance_zero123.refine(images, vers, hors, radii, strength=strength, default_elevation=self.opt.elevation).float()
                 refined_images = F.interpolate(refined_images, (render_resolution, render_resolution), mode="bilinear", align_corners=False)
                 loss = loss + self.opt.lambda_zero123 * F.mse_loss(images, refined_images)
                 # loss = loss + self.opt.lambda_zero123 * self.lpips_loss(images, refined_images)
